@@ -14,13 +14,13 @@ Extreme heat is the deadliest weather hazard in the US. Exposure is not shared e
 Landsat 8/9 (summer, cloud-masked) ─┐
 ESA WorldCover (trees, built, water) ├─► GEE zonal stats by tract ─► heat_greenness.csv ─┐
 US Census TIGER 2020 tracts ────────┘                                                  ├─► run_analysis.py ─► report + figures
-Census API: ACS 5-year (poverty, income, race/ethnicity, age 65+) ─► acs.csv ──────────┘
+ACS 5-year summary files (poverty, income, race, age 65+) ─► acs.csv ──────────┘
 ```
 
 | Step | File | What it does |
 | --- | --- | --- |
 | 1 | [`gee/heat_greenness_by_tract.js`](gee/heat_greenness_by_tract.js) | Builds a median summer composite of Landsat Collection 2 surface temperature (°C) and NDVI, masking clouds, shadows and open water. It summarizes these by tract, along with tree and built-up fractions, and exports a CSV. |
-| 2 | [`scripts/get_acs.py`](scripts/get_acs.py) | Downloads tract-level ACS indicators from the Census API (standard library only). |
+| 2 | [`scripts/get_acs.py`](scripts/get_acs.py) | Downloads tract-level ACS indicators from the Census summary files, no API key needed (standard library only; pass `--key` to use the faster Census API). |
 | 3 | [`scripts/run_analysis.py`](scripts/run_analysis.py) | Joins the two, builds a vulnerability index (mean z-score), and compares heat across vulnerability quintiles. It fits `LST ~ tree cover + vulnerability` with robust standard errors and tests spatial clustering with Moran's I. |
 
 ## Run it

@@ -133,3 +133,25 @@ def test_acs_tidy_handles_missing_codes():
     assert row["pct_poverty"] == 25.0
     assert row["pct_minority"] == 40.0
     assert row["pct_age65"] == 12.0
+
+
+def test_summary_file_parsing_matches_api_layout():
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import get_acs
+
+    assert get_acs.summary_column("B01001_020E") == "B01001_E020"
+    lines = [
+        "GEO_ID|B17001_E001|B17001_M001|B17001_E002|B17001_M002\n",
+        "0500000US13059|120000|50|30000|900\n",
+        "1400000US13057090100|1000|10|100|5\n",
+        "1400000US13059000100|800|20|200|9\n",
+        "1400000US13059000200|500|15|-666666666|-222222222\n",
+        "1400000US13061950100|400|10|40|4\n",
+    ]
+    recs = get_acs.parse_summary_lines(lines, "13", "059", ["B17001_001E", "B17001_002E"])
+    assert sorted(recs) == ["13059000100", "13059000200"]
+    assert recs["13059000100"] == {"state": "13", "county": "059", "tract": "000100",
+                                   "B17001_001E": "800", "B17001_002E": "200"}
+    rows = get_acs.tidy(recs.values())
+    assert rows[0]["pct_poverty"] == 25.0
+    assert rows[1]["pct_poverty"] is None
